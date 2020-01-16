@@ -9,10 +9,12 @@
     mc:Ignorable="d"
     Background="WhiteSmoke"
     RequestedTheme="Light">
-    
+
+    <!--
     <Page.DataContext>
-        <local:MainPageDataSample/>
+        <local:MainPageData/>
     </Page.DataContext>
+    -->
     
     <!-- Static Resource Disctionary ************************************************************ -->
     <Page.Resources>
