@@ -1,0 +1,385 @@
+﻿<Page
+    x:Class="ToDoApp.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ToDoApp"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:Microsoft.UI.Xaml.Controls"
+    mc:Ignorable="d"
+    Background="WhiteSmoke"
+    RequestedTheme="Light">
+    
+    <Page.DataContext>
+        <local:MainPageDataSample/>
+    </Page.DataContext>
+    
+    <!-- Static Resource Disctionary ************************************************************ -->
+    <Page.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Dictionary1.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <local:ItemTypeConstantVisConverter x:Key="CheckBoxVisConverter"/>
+            <local:ItemTypeOnceVisConverter x:Key="IconOnceVisConverter"/>
+            <local:ItemTypeCommonVisConverter x:Key="IconCommonVisConverter"/>
+            <local:ItemTypeToggledVisConverter x:Key="IconToggledVisConverter"/>
+
+            <DataTemplate x:Key="ToDoCategoryTemplate">
+                <StackPanel
+                    AllowDrop="True"
+                    CanDrag="True"
+                    DragStarting="Category_DragStarting"
+                    DragEnter="Category_DragOver"
+                    DragOver="Category_DragOver"
+                    Drop="Category_Drop"
+                    >
+                    <Grid Background="AliceBlue" Width="{Binding Width}" Height="auto" BorderBrush="Gray" BorderThickness="1"
+                        PointerEntered="CategoryHeader_PointerEntered"
+                        PointerExited="CategoryHeader_PointerExited"
+                        PointerPressed="CategoryHeader_PointerPressed"
+                        DoubleTapped="CategoryHeader_DoubleClick"
+                        >
+                        <TextBlock Text="{Binding CategoryName}" HorizontalTextAlignment="Center" FontSize="16" Margin="5,0,5,5" />
+                    </Grid>
+                    <ListView 
+                        ItemsSource="{Binding ToDoItems, Mode=OneWay}"
+                        Width="{Binding Width}"
+                        Background="White"
+                        SelectionMode="Single"
+                        IsItemClickEnabled="True"
+                        AllowDrop="True"
+                        CanDragItems="True"
+                        DragItemsStarting="ToDoItem_DragItemsStarting"
+                        ItemClick="ToDoItem_Click"
+                        >
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <!-- Item Template -->
+                                <Grid AllowDrop="True"
+                                      DragEnter="ToDoItem_DragOver"
+                                      DoubleTapped="ToDoItem_DoubleClick"
+                                      Padding="6,0,2,5"
+                                      >
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="auto"/>
+                                        <RowDefinition Height="auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding ItemName}" Width="auto" Margin="0,2,0,0"/>
+                                    <FontIcon Glyph="&#xE711;" FontFamily="Segoe MDL2 Assets" FontSize="20" Foreground="#DDD" Margin="0,3,1,0" Grid.Column="1" Grid.RowSpan="2" HorizontalAlignment="Right" VerticalAlignment="Top" IsHitTestVisible="False"
+                                                Visibility="{Binding ItemType, Mode=OneWay, Converter={StaticResource IconOnceVisConverter}}"/>
+                                    <FontIcon Glyph="&#xE734;" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="#DDD" Margin="0,5,3,0" Grid.Column="1" Grid.RowSpan="2" HorizontalAlignment="Right" VerticalAlignment="Top" IsHitTestVisible="False"
+                                                Visibility="{Binding ItemType, Mode=OneWay, Converter={StaticResource IconCommonVisConverter}}"/>
+                                    <FontIcon Glyph="&#xE73E;" FontFamily="Segoe MDL2 Assets" FontSize="20" Foreground="#DDD" Margin="0,3,1,0" Grid.Column="1" Grid.RowSpan="2" HorizontalAlignment="Right" VerticalAlignment="Top" IsHitTestVisible="False"
+                                                Visibility="{Binding ItemType, Mode=OneWay, Converter={StaticResource IconToggledVisConverter}}"/>
+                                    <CheckBox Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" Style="{StaticResource ToDoCheckBoxStyle}" Margin="2,-3,1,0" IsTabStop="False" UseSystemFocusVisuals="False"
+                                                Visibility="{Binding ItemType, Mode=OneWay, Converter={StaticResource CheckBoxVisConverter}}" 
+                                                IsChecked="{Binding ItemComplete, Mode=TwoWay}" 
+                                                Checked="ToDoItem_Checked" Unchecked="ToDoItem_Unchecked"/>
+                                    <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding ItemDescription}" Foreground="DimGray" TextTrimming="WordEllipsis"/>
+                                    <Rectangle Grid.RowSpan="2" Grid.ColumnSpan="2" Fill="DarkGray" Opacity="0.8" Visibility="{Binding ItemComplete, Mode=OneWay}" Margin="-6,0,-2,-5" IsHitTestVisible="False"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                    <Grid Width="auto" Height="20" Background="LightGray" BorderBrush="DarkGray" BorderThickness="1,0,1,1"
+                          AllowDrop="True" Drop="CategoryFooter_Drop" DoubleTapped="CategoryFooter_DoubleClick">
+                        <TextBlock FontFamily="Segoe MDL2 Assets" Text="&#xE734;" FontSize="16" Margin="0,2,0,0" HorizontalAlignment="Center" VerticalAlignment="Top" Foreground="#BBB"/>
+                    </Grid>
+                </StackPanel>
+            </DataTemplate>
+
+            <DataTemplate x:Key="RecyclingTemplate">
+                <StackPanel>
+                    <Grid Background="LightGray" Width="{Binding Width}" Height="auto" BorderBrush="Gray" BorderThickness="1">
+                        <TextBlock Text="{Binding CategoryName}" HorizontalTextAlignment="Center" FontSize="16" Margin="5,0,5,5"/>
+                    </Grid>
+                    <ListView ItemsSource="{Binding Recycling, Mode=OneWay}"
+                          Width="{Binding Width, Mode=OneWay}"
+                          Background="#C66"
+                          SelectionMode="None"
+                          DoubleTapped="RecyclingItem_DoubleClick"
+                          >
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <!-- Item Template -->
+                                <Grid Padding="6,0,2,5">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="auto"/>
+                                        <RowDefinition Height="auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding ItemName}" Width="auto"/>
+                                    <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding ItemDescription}" Foreground="#333" TextTrimming="WordEllipsis"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </StackPanel>
+            </DataTemplate>
+
+            <DataTemplate x:Key="CommonTemplate">
+                <StackPanel>
+                    <Grid Background="LightGray" Width="{Binding Width}" Height="auto" BorderBrush="Gray" BorderThickness="1">
+                        <TextBlock Text="{Binding CategoryName}" HorizontalTextAlignment="Center" FontSize="16" Margin="5,0,5,5"/>
+                    </Grid>
+                    <ListView ItemsSource="{Binding CommonItems, Mode=OneWay}"
+                          Width="{Binding Width, Mode=OneWay}"
+                          Background="AliceBlue"
+                          SelectionMode="None"
+                          DoubleTapped="CommonItem_DoubleClick"
+                          >
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <!-- Item Template -->
+                                <Grid Padding="6,0,2,5">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="auto"/>
+                                        <RowDefinition Height="auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding ItemName}" Width="auto"/>
+                                    <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding ItemDescription}" Foreground="DimGray" TextTrimming="WordEllipsis"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </StackPanel>
+            </DataTemplate>
+
+        </ResourceDictionary>
+    </Page.Resources>
+
+    <!-- Page Content ***************************************************************** -->
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="33"/><!-- Menubar -->
+            <RowDefinition Height="36"/><!-- Toolbar -->
+            <RowDefinition Height="*"/><!-- Main Content -->
+            <RowDefinition Height="auto"/><!-- Footer -->
+        </Grid.RowDefinitions>
+
+        <!-- Title Bar -->
+        <Rectangle Grid.Row="0" Fill="{Binding TitlebarColor}" x:Name="BackgroundElement" />
+        
+        <!-- Menubar _________________________________________________________________ -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" 
+                    BorderBrush="LightGray" BorderThickness="0,0,0,1">
+            <Button Content="New" Style="{StaticResource MenuButtons}" Click="BtnNewFile_Click"/>
+            <Button Content="Open" Style="{StaticResource MenuButtons}" Click="BtnOpenFile_Click"/>
+            <Button Content="Save" Style="{StaticResource MenuButtons}" Click="BtnSaveFile_Click"/>
+            <Button Content="Save As" Style="{StaticResource MenuButtons}" Click="BtnSaveAsFile_Click"/>
+            <Button x:Name="FocusDump" FocusVisualPrimaryBrush="Transparent" Width="0" Height="0"/>
+        </StackPanel>
+        <TextBlock x:Name="TxtFileName" Text="{Binding TitlebarText, Mode=OneWay}" Grid.Row="0" FontSize="14" Foreground="Gray" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,2,0,0" IsHitTestVisible="False"/>
+
+        <!-- Toolbar _________________________________________________________________ -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Orientation="Horizontal">
+                <TextBlock x:Name="TextBlockAddType" Text="Add Category" Height="22" Width="90" VerticalAlignment="Center" TextAlignment="Right" Margin="5,0,5,0"/>
+                <TextBox x:Name="TextBoxAdd" Height="32" Width="260" Margin="0,0,5,0"
+                         KeyDown="TextBoxAdd_KeyDown"/>
+                <Button Content="&#xE710;" FontFamily="Segoe MDL2 Assets" Click="AddBtn_Click" Style="{StaticResource RowButtons}"/>
+                <Button Content="&#xE711;" FontFamily="Segoe MDL2 Assets" Click="ClearBtn_Click" Style="{StaticResource RowButtons}"/>
+                <Rectangle Style="{StaticResource MenuSeperator}"/>
+                <ComboBox x:Name="ComboBoxItemType" VerticalAlignment="Center" Margin="0,0,5,0" Width="100">
+                    <ComboBoxItem Content="Default" IsSelected="True"/>
+                    <ComboBoxItem Content="Constant"/>
+                    <ComboBoxItem Content="Common"/>
+                    <ComboBoxItem Content="Toggled"/>
+                    <ComboBoxItem Content="Once"/>
+                </ComboBox>
+                <Slider x:Name="SliderWidth" Style="{StaticResource SliderStyle}" Width="120" Margin="0,0,5,0" Minimum="100" Maximum="400" StepFrequency="10" SmallChange="10" LargeChange="10" 
+                        Value="{Binding WidthSliderValue, Mode=TwoWay}"
+                        ValueChanged="WidthSlider_ValueChanged"/>
+                <Rectangle Style="{StaticResource MenuSeperator}"/>
+            </StackPanel>
+            <Border Grid.Column="2" x:Name="Trash" Width="138" Background="LightGray" VerticalAlignment="Stretch" HorizontalAlignment="Right"
+                    AllowDrop="True" Drop="Trash_Drop" DragEnter="Trash_DragEnter" DragLeave="Trash_DragLeave">
+                <FontIcon x:Name="TrashIcon" Glyph="&#xE74D;" FontFamily="Segoe MDL2 Assets" FontSize="24" Foreground="#555"
+                          DoubleTapped="TrashIcon_DoubleClick"/>
+            </Border>
+        </Grid>
+        
+        <!-- Main Content _________________________________________________________________ -->
+
+        <ScrollViewer Grid.Row="2" 
+                      PointerPressed="Bg_Deselect"
+                      HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Auto" 
+                      BorderBrush="LightGray" BorderThickness="0,1,0,0">
+            <controls:ItemsRepeater Margin="5,12,5,5" 
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        ItemsSource="{Binding ToDoCategories, Mode=OneWay}"
+                        ItemTemplate="{StaticResource ToDoCategoryTemplate}">
+                <controls:ItemsRepeater.Layout>
+                    <controls:StackLayout Orientation="Horizontal" Spacing="5"/>
+                </controls:ItemsRepeater.Layout>
+
+            </controls:ItemsRepeater>
+        </ScrollViewer>
+
+        <!-- Footer _________________________________________________________________ -->
+        <StackPanel Grid.Row="3" Background="Silver">
+            <TextBlock x:Name="TxtFooter" Text="..." Foreground="Gray" HorizontalAlignment="Center"/>
+        </StackPanel>
+
+        <!-- Edit Item Overlay ******************************************************** -->
+        <Grid x:Name="EditItemOverlay" Background="#BB888888" Grid.Row="1" Grid.RowSpan="2" Visibility="Collapsed">
+            <Border Width="600" Height="400" Background="LightGray" BorderBrush="SlateGray" BorderThickness="2" CornerRadius="4">
+                <StackPanel Background="LightGray" VerticalAlignment="Top" HorizontalAlignment="Stretch" Padding="10">
+                    <TextBlock Text="Item Name" FontSize="13"/>
+                    <TextBox x:Name="TextBoxEditName" PlaceholderText="..." KeyDown="OverlayScreen_KeyDown"/>
+                    <TextBlock Text="Item Description" FontSize="13" Margin="0,10,0,0"/>
+                    <TextBox x:Name="TextBoxEditDescription" PlaceholderText="..." KeyDown="OverlayScreen_KeyDown" Height="255" TextWrapping="Wrap"/>
+                    <Grid Margin="0,10,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Left">
+                            <RadioButton x:Name="RadioButtonConstantI" Style="{StaticResource RadioButtonStyle}" Content="Constant"/>
+                            <RadioButton x:Name="RadioButtonCommonI" Style="{StaticResource RadioButtonStyle}" Content="Common"/>
+                            <RadioButton x:Name="RadioButtonToggledI" Style="{StaticResource RadioButtonStyle}" Content="Toggled"/>
+                            <RadioButton x:Name="RadioButtonOnceI" Content="Once" Style="{StaticResource RadioButtonStyle}" IsChecked="True"/>
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Content="Save" Width="60" Style="{StaticResource MenuButtons}" Background="Silver" CornerRadius="2" Margin="0,0,8,0"
+                                                Click="EditScreen_Save"/>
+                            <Button Content="Cancel" Width="60" Style="{StaticResource MenuButtons}" Background="Silver" CornerRadius="2"
+                                                Click="OverlayScreen_Cancel"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+            <Grid.Resources>
+                <Storyboard x:Name="AnimateEditItemIn">
+                    <PopInThemeAnimation Storyboard.TargetName="EditItemOverlay" />
+                </Storyboard>
+                <Storyboard x:Name="AnimateEditItemOut">
+                    <PopOutThemeAnimation Storyboard.TargetName="EditItemOverlay" />
+                </Storyboard>
+            </Grid.Resources>
+        </Grid>
+
+        <!-- Edit Category Overlay ******************************************************** -->
+        <Grid x:Name="EditCategoryOverlay" Background="#BB888888" Grid.Row="1" Grid.RowSpan="2" Visibility="Collapsed">
+            <Border Width="600" Height="136" Background="LightGray" BorderBrush="SlateGray" BorderThickness="2" CornerRadius="4">
+                <StackPanel Background="LightGray" VerticalAlignment="Top" HorizontalAlignment="Stretch" Padding="10">
+                    <TextBlock Text="Category Name" FontSize="13"/>
+                    <TextBox x:Name="TextBoxEditCategory" PlaceholderText="..." KeyDown="OverlayScreen_KeyDown"/>
+                    <TextBlock Text="Default Item Type" FontSize="13" Margin="0,10,0,0"/>
+                    <Grid Margin="0,0,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Left">
+                            <RadioButton x:Name="RadioButtonConstantC" Style="{StaticResource RadioButtonStyle}" Content="Constant"/>
+                            <RadioButton x:Name="RadioButtonCommonC" Style="{StaticResource RadioButtonStyle}" Content="Common"/>
+                            <RadioButton x:Name="RadioButtonToggledC" Style="{StaticResource RadioButtonStyle}" Content="Toggled"/>
+                            <RadioButton x:Name="RadioButtonOnceC" Content="Once" Style="{StaticResource RadioButtonStyle}" IsChecked="True"/>
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Content="Save" Width="60" Style="{StaticResource MenuButtons}" Background="Silver" CornerRadius="2" Margin="0,0,8,0"
+                                                Click="EditScreen_Save"/>
+                            <Button Content="Cancel" Width="60" Style="{StaticResource MenuButtons}" Background="Silver" CornerRadius="2"
+                                                Click="OverlayScreen_Cancel"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+            <Grid.Resources>
+                <Storyboard x:Name="AnimateEditCategoryIn">
+                    <PopInThemeAnimation Storyboard.TargetName="EditCategoryOverlay" />
+                </Storyboard>
+                <Storyboard x:Name="AnimateEditCategoryOut">
+                    <PopOutThemeAnimation Storyboard.TargetName="EditCategoryOverlay" />
+                </Storyboard>
+            </Grid.Resources>
+        </Grid>
+
+        <!-- Recycling Bin Overlay ******************************************************** -->
+        <Grid x:Name="RecyclingBinOverlay" Background="#BB888888" Grid.Row="1" Grid.RowSpan="2" Visibility="Collapsed">
+            <Border Width="auto" Height="auto" Margin="60,37" Background="Gainsboro" BorderBrush="SlateGray" BorderThickness="2" CornerRadius="4">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0" HorizontalAlignment="Center">
+                            <TextBlock Text="Recycling Bin" FontSize="20" Margin="0,0,20,0"/>
+                            <Button x:Name="BtnRecyclingClose" Content="Close" Width="60" Style="{StaticResource MenuButtons}" Background="Silver" CornerRadius="2"
+                                Click="OverlayScreen_Cancel" KeyDown="OverlayScreen_KeyDown"/>
+                        </StackPanel>
+                        <controls:ItemsRepeater Margin="5,12,5,5" 
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        ItemsSource="{Binding ToDoCategories}"
+                        ItemTemplate="{StaticResource RecyclingTemplate}">
+                            <controls:ItemsRepeater.Layout>
+                                <controls:StackLayout Orientation="Horizontal" Spacing="5"/>
+                            </controls:ItemsRepeater.Layout>
+                        </controls:ItemsRepeater>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+            
+            <Grid.Resources>
+                <Storyboard x:Name="AnimateRecyclingBinIn">
+                    <PopInThemeAnimation Storyboard.TargetName="RecyclingBinOverlay" />
+                </Storyboard>
+                <Storyboard x:Name="AnimateRecyclingBinOut">
+                    <PopOutThemeAnimation Storyboard.TargetName="RecyclingBinOverlay" />
+                </Storyboard>
+            </Grid.Resources>
+        </Grid>
+
+        <!-- Common Items Overlay ******************************************************** -->
+        <Grid x:Name="CommonItemsOverlay" Background="#BB888888" Grid.Row="1" Grid.RowSpan="2" Visibility="Collapsed">
+            <Border Width="auto" Height="auto" Margin="60,37" Background="Gainsboro" BorderBrush="SlateGray" BorderThickness="2" CornerRadius="4">
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0" HorizontalAlignment="Center">
+                            <TextBlock Text="Common Items" FontSize="20" Margin="0,0,20,0"/>
+                            <Button x:Name="BtnCommonItemsClose" Content="Close" Width="60" Style="{StaticResource MenuButtons}" Background="Silver" CornerRadius="2"
+                                    Click="OverlayScreen_Cancel" KeyDown="OverlayScreen_KeyDown"/>
+                        </StackPanel>
+                        <controls:ItemsRepeater Margin="5,12,5,5" 
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Top"
+                        ItemsSource="{Binding ToDoCategories}"
+                        ItemTemplate="{StaticResource CommonTemplate}">
+                            <controls:ItemsRepeater.Layout>
+                                <controls:StackLayout Orientation="Horizontal" Spacing="5"/>
+                            </controls:ItemsRepeater.Layout>
+                        </controls:ItemsRepeater>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+            <Grid.Resources>
+                <Storyboard x:Name="AnimateCommonItemsIn">
+                    <PopInThemeAnimation Storyboard.TargetName="CommonItemsOverlay" />
+                </Storyboard>
+                <Storyboard x:Name="AnimateCommonItemsOut">
+                    <PopOutThemeAnimation Storyboard.TargetName="CommonItemsOverlay" />
+                </Storyboard>
+            </Grid.Resources>
+        </Grid>
+
+    </Grid>
+</Page>
