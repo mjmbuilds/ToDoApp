@@ -52,6 +52,7 @@ namespace ToDoApp
                 if (insertDataType != value)
                 {
                     insertDataType = value;
+                    TextBlockAddType.Text = (insertDataType == DataType.Category) ? "Add Category" : "Add Item";
                 }
             }
         }
