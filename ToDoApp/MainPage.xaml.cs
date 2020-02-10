@@ -20,11 +20,6 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 #endregion
 
-/****************************************************************************************************
-Local folder:
-C:\Users\Michael\AppData\Local\Packages\07a50b60-7aac-482b-bed3-1a2837a61ce9_eq9h3e6grdrp4\LocalState
-*****************************************************************************************************/
-
 namespace ToDoApp
 {
     public sealed partial class MainPage : Page
@@ -496,9 +491,10 @@ namespace ToDoApp
             picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
             picker.FileTypeFilter.Add(".json");
 
-            saveFile = await picker.PickSingleFileAsync(); // get file/folder from user
-            if (saveFile != null)
+            var newSaveFile = await picker.PickSingleFileAsync(); // get file/folder from user
+            if (newSaveFile != null)
             {
+                saveFile = newSaveFile;
                 fileToken = StorageApplicationPermissions.FutureAccessList.Add(saveFile); // token to access the file later
                 UpdateSettings(); // save the token to local settings file
                 LoadModel(); // load data from save file to the model
@@ -517,9 +513,10 @@ namespace ToDoApp
             picker.SuggestedStartLocation = PickerLocationId.DocumentsLibrary;
             picker.FileTypeChoices.Add("Json", new List<string>() { ".json" });
 
-            saveFile = await picker.PickSaveFileAsync(); // get file/folder from user
-            if (saveFile != null)
+            var newSaveFile = await picker.PickSaveFileAsync(); // get file/folder from user
+            if (newSaveFile != null)
             {
+                saveFile = newSaveFile;
                 fileToken = StorageApplicationPermissions.FutureAccessList.Add(saveFile); // token to access the file later
                 UpdateSettings(); // save the token to local settings file
                 StartSave(); // save data from model to the save file
@@ -530,6 +527,9 @@ namespace ToDoApp
         {
             if (!String.IsNullOrEmpty(TextBoxAdd.Text))
             {
+                var x1 = ComboBoxItemType.SelectedItem;
+                var x2 = ComboBoxItemType.SelectedValue;
+
                 string selectedType = (ComboBoxItemType.SelectedItem as ComboBoxItem).Content as string;
                 ItemType itemType = ItemType.Once;
                 switch (selectedType)
@@ -883,10 +883,6 @@ namespace ToDoApp
             saveTimer.Start();
         }
         #endregion
-
-
-
-
 
     }
 }
