@@ -527,9 +527,6 @@ namespace ToDoApp
         {
             if (!String.IsNullOrEmpty(TextBoxAdd.Text))
             {
-                var x1 = ComboBoxItemType.SelectedItem;
-                var x2 = ComboBoxItemType.SelectedValue;
-
                 string selectedType = (ComboBoxItemType.SelectedItem as ComboBoxItem).Content as string;
                 ItemType itemType = ItemType.Once;
                 switch (selectedType)
@@ -572,7 +569,7 @@ namespace ToDoApp
                     }
                     else
                     {
-                        selectedToDoCategory?.ToDoItems.Insert(insertIndex, new ToDoItem(TextBoxAdd.Text, "", 0));
+                        selectedToDoCategory?.ToDoItems.Insert(insertIndex, new ToDoItem(TextBoxAdd.Text, "", itemType));
 
                         if (previouslySelected is ListView)
                         {
