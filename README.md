@@ -1,6 +1,8 @@
 # ToDoApp
 A to-do list / productivity tool I created as an easy way to organize items into categories with the ability to reorder by drag and drop. I chose to make this in UWP just to broaden my knowledge.
+
 ![](images/screenshot01.png)
+
 ![](images/screenshot02.png)
 
 There are four types of items that can be added to a category:
